@@ -1,27 +1,44 @@
-import React from 'react';
+import React,{useState,useEffect, useContext} from 'react';
+import { FirebaseContext } from '../../store/fireBaseContext';
+import { PostContext } from '../../store/productContext';
+
 
 import './View.css';
 function View() {
+  const [userDetails,setUserDetails] = useState()
+  const {productDetails}=useContext(PostContext)
+  const {firebase}= useContext(FirebaseContext)
+  useEffect(()=>{
+    const {userid}=productDetails
+    firebase.firestore().collection('users').where('id','==',userid).get().then((res)=>{
+      res.forEach(element => {
+        setUserDetails(element.data())
+      });
+    })
+  },[])
   return (
     <div className="viewParentDiv">
       <div className="imageShowDiv">
         <img
-          src="../../../Images/R15V3.jpg"
+          src={productDetails.url}
           alt=""
         />
       </div>
       <div className="rightSection">
         <div className="productDetails">
-          <p>&#x20B9; 250000 </p>
-          <span>YAMAHA R15V3</span>
-          <p>Two Wheeler</p>
-          <span>Tue May 04 2021</span>
+          <p>&#x20B9; {productDetails.price} </p>
+          <span>{productDetails.name}</span>
+          <p>{productDetails.category}</p>
+          <span>{productDetails.CreatedAt}</span>
         </div>
-        <div className="contactDetails">
+        { userDetails &&
+          <div className="contactDetails">
           <p>Seller details</p>
-          <p>No name</p>
-          <p>1234567890</p>
+          <p>{userDetails.username}</p>
+          <p>{userDetails.phone}</p>
         </div>
+        }
+        
       </div>
     </div>
   );
